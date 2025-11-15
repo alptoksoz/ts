@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +18,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function LessonsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { width } = useWindowDimensions();
 
   const getTopicIcon = (type: Topic['type']) => {
     switch (type) {
@@ -114,7 +116,7 @@ export default function LessonsScreen() {
                         style={[
                           styles.pathLine,
                           {
-                            left: isEven ? '25%' : '75%',
+                            left: isEven ? (width - 40) * 0.25 : (width - 40) * 0.75,
                             backgroundColor: topic.locked ? '#E5E5E5' : '#CCCCCC',
                           },
                         ]}
@@ -180,7 +182,7 @@ export default function LessonsScreen() {
 
             {/* Spacer between groups */}
             {groupIndex < subjectGroups.length - 1 && (
-              <View style={styles.groupSpacer} />
+              <View style={[styles.groupSpacer, { marginLeft: (width - 40) * 0.5 }]} />
             )}
           </View>
         ))}
@@ -342,7 +344,6 @@ const styles = StyleSheet.create({
     height: 40,
     borderLeftWidth: 4,
     borderLeftColor: '#E5E5E5',
-    marginLeft: '50%',
     transform: [{ translateX: -2 }],
   },
 });
