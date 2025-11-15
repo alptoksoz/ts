@@ -10,40 +10,68 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { units } from '../data/mockData';
-import { Lesson } from '../types';
+import { subjectGroups, subjects } from '../data/mockData';
+import { Topic } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function LessonsScreen() {
   const navigation = useNavigation<NavigationProp>();
 
-  const getLessonIcon = (type: Lesson['type']) => {
+  const getTopicIcon = (type: Topic['type']) => {
     switch (type) {
-      case 'lesson':
+      case 'theory':
         return '📖';
       case 'practice':
         return '🎯';
-      case 'story':
-        return '📚';
-      case 'test':
+      case 'mixed':
+        return '📝';
+      case 'exam':
         return '🏆';
       default:
-        return '📝';
+        return '📋';
     }
   };
 
-  const getLessonColor = (lesson: Lesson) => {
-    if (lesson.locked) return '#CCCCCC';
-    if (lesson.completed) return '#58CC02';
-    return '#1CB0F6';
+  const getTopicColor = (topic: Topic) => {
+    if (topic.locked) return '#CCCCCC';
+    if (topic.completed) return '#58CC02';
+
+    const subject = subjects.find(s => s.id === topic.subjectId);
+    return subject?.color || '#1CB0F6';
+  };
+
+  const getDifficultyColor = (difficulty: Topic['difficulty']) => {
+    switch (difficulty) {
+      case 'easy':
+        return '#58CC02';
+      case 'medium':
+        return '#FF9600';
+      case 'hard':
+        return '#FF4B4B';
+      default:
+        return '#CCCCCC';
+    }
+  };
+
+  const getDifficultyLabel = (difficulty: Topic['difficulty']) => {
+    switch (difficulty) {
+      case 'easy':
+        return 'Kolay';
+      case 'medium':
+        return 'Orta';
+      case 'hard':
+        return 'Zor';
+      default:
+        return '';
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Dil Öğrenme Yolu</Text>
-        <Text style={styles.subtitle}>Her gün pratik yaparak ilerle!</Text>
+        <Text style={styles.title}>Konu Yolculuğu</Text>
+        <Text style={styles.subtitle}>TUS'a adım adım hazırlan!</Text>
       </View>
 
       <ScrollView
@@ -51,42 +79,43 @@ export default function LessonsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {units.map((unit, unitIndex) => (
-          <View key={unit.id} style={styles.unitContainer}>
-            {/* Unit Header */}
-            <View style={styles.unitHeader}>
+        {subjectGroups.map((group, groupIndex) => (
+          <View key={group.id} style={styles.groupContainer}>
+            {/* Group Header */}
+            <View style={styles.groupHeader}>
               <View
                 style={[
-                  styles.unitBadge,
-                  { backgroundColor: unit.unlocked ? '#FFD900' : '#E5E5E5' },
+                  styles.groupBadge,
+                  { backgroundColor: group.unlocked ? (group.category === 'basic' ? '#4ECDC4' : '#A8E6CF') : '#E5E5E5' },
                 ]}
               >
-                <Text style={styles.unitBadgeText}>
-                  {unit.unlocked ? '🌟' : '🔒'}
+                <Text style={styles.groupBadgeText}>
+                  {group.unlocked ? (group.category === 'basic' ? '🧬' : '🏥') : '🔒'}
                 </Text>
               </View>
-              <View style={styles.unitInfo}>
-                <Text style={styles.unitTitle}>{unit.title}</Text>
-                <Text style={styles.unitDescription}>{unit.description}</Text>
+              <View style={styles.groupInfo}>
+                <Text style={styles.groupTitle}>{group.title}</Text>
+                <Text style={styles.groupDescription}>{group.description}</Text>
               </View>
             </View>
 
-            {/* Lessons Path */}
-            <View style={styles.lessonsPath}>
-              {unit.lessons.map((lesson, lessonIndex) => {
-                const isEven = lessonIndex % 2 === 0;
-                const lessonColor = getLessonColor(lesson);
+            {/* Topics Path */}
+            <View style={styles.topicsPath}>
+              {group.topics.map((topic, topicIndex) => {
+                const isEven = topicIndex % 2 === 0;
+                const topicColor = getTopicColor(topic);
+                const subject = subjects.find(s => s.id === topic.subjectId);
 
                 return (
-                  <View key={lesson.id} style={styles.lessonRow}>
+                  <View key={topic.id} style={styles.topicRow}>
                     {/* Path line */}
-                    {lessonIndex > 0 && (
+                    {topicIndex > 0 && (
                       <View
                         style={[
                           styles.pathLine,
                           {
                             left: isEven ? '25%' : '75%',
-                            backgroundColor: lesson.locked ? '#E5E5E5' : '#CCCCCC',
+                            backgroundColor: topic.locked ? '#E5E5E5' : '#CCCCCC',
                           },
                         ]}
                       />
@@ -94,48 +123,65 @@ export default function LessonsScreen() {
 
                     <TouchableOpacity
                       style={[
-                        styles.lessonButton,
+                        styles.topicButton,
                         {
                           alignSelf: isEven ? 'flex-start' : 'flex-end',
-                          backgroundColor: lessonColor,
+                          backgroundColor: topicColor,
                         },
                       ]}
                       onPress={() => {
-                        if (!lesson.locked) {
-                          navigation.navigate('Exercise', { lessonId: lesson.id });
+                        if (!topic.locked) {
+                          navigation.navigate('Exercise', { lessonId: topic.id });
                         }
                       }}
-                      disabled={lesson.locked}
+                      disabled={topic.locked}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.lessonIcon}>
-                        {lesson.locked ? '🔒' : getLessonIcon(lesson.type)}
+                      <Text style={styles.topicIcon}>
+                        {topic.locked ? '🔒' : subject?.icon || getTopicIcon(topic.type)}
                       </Text>
-                      {lesson.completed && (
+                      {topic.completed && (
                         <View style={styles.completedBadge}>
                           <Text style={styles.completedCheck}>✓</Text>
+                        </View>
+                      )}
+                      {!topic.locked && !topic.completed && (
+                        <View
+                          style={[
+                            styles.difficultyBadge,
+                            { backgroundColor: getDifficultyColor(topic.difficulty) },
+                          ]}
+                        >
+                          <Text style={styles.difficultyText}>
+                            {getDifficultyLabel(topic.difficulty)[0]}
+                          </Text>
                         </View>
                       )}
                     </TouchableOpacity>
 
                     <View
                       style={[
-                        styles.lessonInfo,
+                        styles.topicInfo,
                         {
                           alignItems: isEven ? 'flex-start' : 'flex-end',
                         },
                       ]}
                     >
-                      <Text style={styles.lessonTitle}>{lesson.title}</Text>
-                      <Text style={styles.lessonXP}>+{lesson.xp} XP</Text>
+                      <Text style={styles.topicTitle}>{topic.title}</Text>
+                      <Text style={styles.topicSubject}>{subject?.name}</Text>
+                      <Text style={styles.topicQuestions}>
+                        {topic.questionCount} soru
+                      </Text>
                     </View>
                   </View>
                 );
               })}
             </View>
 
-            {/* Spacer between units */}
-            {unitIndex < units.length - 1 && <View style={styles.unitSpacer} />}
+            {/* Spacer between groups */}
+            {groupIndex < subjectGroups.length - 1 && (
+              <View style={styles.groupSpacer} />
+            )}
           </View>
         ))}
 
@@ -173,42 +219,42 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 20,
   },
-  unitContainer: {
+  groupContainer: {
     paddingHorizontal: 20,
   },
-  unitHeader: {
+  groupHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
     gap: 12,
   },
-  unitBadge: {
+  groupBadge: {
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  unitBadgeText: {
+  groupBadgeText: {
     fontSize: 28,
   },
-  unitInfo: {
+  groupInfo: {
     flex: 1,
   },
-  unitTitle: {
+  groupTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#1F1F1F',
     marginBottom: 2,
   },
-  unitDescription: {
+  groupDescription: {
     fontSize: 14,
     color: '#777777',
   },
-  lessonsPath: {
+  topicsPath: {
     position: 'relative',
   },
-  lessonRow: {
+  topicRow: {
     marginBottom: 40,
     position: 'relative',
   },
@@ -219,7 +265,7 @@ const styles = StyleSheet.create({
     height: 40,
     transform: [{ translateX: -2 }],
   },
-  lessonButton: {
+  topicButton: {
     width: 80,
     height: 80,
     borderRadius: 40,
@@ -234,7 +280,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
     position: 'relative',
   },
-  lessonIcon: {
+  topicIcon: {
     fontSize: 36,
   },
   completedBadge: {
@@ -255,22 +301,44 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  lessonInfo: {
+  difficultyBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  difficultyText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  topicInfo: {
     marginTop: 8,
     width: '50%',
   },
-  lessonTitle: {
+  topicTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1F1F1F',
+    marginBottom: 2,
   },
-  lessonXP: {
+  topicSubject: {
+    fontSize: 12,
+    color: '#777777',
+    marginBottom: 2,
+  },
+  topicQuestions: {
     fontSize: 14,
     color: '#58CC02',
     fontWeight: '600',
-    marginTop: 2,
   },
-  unitSpacer: {
+  groupSpacer: {
     height: 40,
     borderLeftWidth: 4,
     borderLeftColor: '#E5E5E5',

@@ -4,61 +4,68 @@ export interface User {
   email: string;
   currentStreak: number;
   longestStreak: number;
-  totalXP: number;
-  level: number;
+  totalPoints: number;
+  correctAnswers: number;
+  totalQuestions: number;
   avatarUrl?: string;
 }
 
-export interface Language {
+export interface Subject {
   id: string;
   name: string;
-  flag: string;
-  nativeName: string;
+  icon: string;
+  category: 'basic' | 'clinical'; // Temel bilimler vs Klinik bilimler
   color: string;
 }
 
-export interface Lesson {
+export interface Topic {
   id: string;
-  unitId: string;
+  subjectId: string;
   title: string;
   description: string;
-  xp: number;
+  questionCount: number;
   completed: boolean;
   locked: boolean;
-  type: 'lesson' | 'practice' | 'story' | 'test';
-  exercises: Exercise[];
+  type: 'theory' | 'practice' | 'mixed' | 'exam';
+  questions: Question[];
+  difficulty: 'easy' | 'medium' | 'hard';
 }
 
-export interface Unit {
+export interface Subject_Group {
   id: string;
   title: string;
   description: string;
-  lessons: Lesson[];
+  topics: Topic[];
   unlocked: boolean;
+  category: 'basic' | 'clinical';
 }
 
-export type ExerciseType =
-  | 'translate'
-  | 'match'
-  | 'select'
-  | 'speak'
-  | 'listen';
+export type QuestionType = 'multiple-choice' | 'true-false' | 'case-based';
 
-export interface Exercise {
+export interface Question {
   id: string;
-  type: ExerciseType;
+  type: QuestionType;
   question: string;
-  answer: string;
-  options?: string[];
-  pairs?: { word: string; translation: string }[];
-  audioUrl?: string;
+  options: string[];
+  correctAnswer: string;
+  explanation?: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  subjectId: string;
   imageUrl?: string;
+  tags?: string[];
 }
 
 export interface UserProgress {
-  languageId: string;
-  currentUnitId: string;
-  completedLessons: string[];
-  dailyGoal: number;
-  todayXP: number;
+  currentSubjectId: string;
+  completedTopics: string[];
+  dailyQuestionGoal: number;
+  todayQuestionsSolved: number;
+  weakSubjects: string[]; // Zayıf olduğu konular
+  stats: {
+    [subjectId: string]: {
+      correct: number;
+      total: number;
+      lastStudied: string;
+    };
+  };
 }

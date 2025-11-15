@@ -8,27 +8,101 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Card, ProgressBar } from '../components';
-import { mockUser, userProgress, languages } from '../data/mockData';
+import { mockUser, userProgress, subjects } from '../data/mockData';
 
 export default function ProfileScreen() {
-  const currentLanguage = languages.find((l) => l.id === userProgress.languageId);
-  const levelProgress = (mockUser.totalXP % 100); // Simulated level progress
+  const successRate =
+    mockUser.totalQuestions > 0
+      ? Math.round((mockUser.correctAnswers / mockUser.totalQuestions) * 100)
+      : 0;
 
   const achievements = [
-    { id: '1', emoji: '🔥', title: 'Ateşli', description: '7 günlük seri', unlocked: true },
-    { id: '2', emoji: '⭐', title: 'Yıldız Öğrenci', description: '1000 XP kazan', unlocked: true },
-    { id: '3', emoji: '🏆', title: 'Şampiyon', description: 'Seviye 10\'a ulaş', unlocked: true },
-    { id: '4', emoji: '📚', title: 'Kitap Kurdu', description: '10 ders tamamla', unlocked: false },
-    { id: '5', emoji: '💯', title: 'Mükemmel', description: '5 dersi %100 ile bitir', unlocked: false },
-    { id: '6', emoji: '🎯', title: 'Hedef Odaklı', description: '30 gün hedef tamamla', unlocked: false },
+    {
+      id: '1',
+      emoji: '🔥',
+      title: 'Kararlı',
+      description: '10 günlük seri',
+      unlocked: mockUser.currentStreak >= 10,
+    },
+    {
+      id: '2',
+      emoji: '⭐',
+      title: 'Başarılı',
+      description: '500 soru çöz',
+      unlocked: mockUser.totalQuestions >= 500,
+    },
+    {
+      id: '3',
+      emoji: '🏆',
+      title: 'Mükemmel',
+      description: '%80 başarı oranı',
+      unlocked: successRate >= 80,
+    },
+    {
+      id: '4',
+      emoji: '📚',
+      title: 'Bilge',
+      description: '1000 soru çöz',
+      unlocked: mockUser.totalQuestions >= 1000,
+    },
+    {
+      id: '5',
+      emoji: '💯',
+      title: 'Uzman',
+      description: '5 konuda %90+',
+      unlocked: false,
+    },
+    {
+      id: '6',
+      emoji: '🎯',
+      title: 'Disiplinli',
+      description: '30 günlük seri',
+      unlocked: false,
+    },
   ];
 
   const stats = [
-    { label: 'Toplam Ders', value: userProgress.completedLessons.length, emoji: '📖' },
-    { label: 'Toplam XP', value: mockUser.totalXP, emoji: '⭐' },
-    { label: 'Güncel Seri', value: mockUser.currentStreak, emoji: '🔥' },
-    { label: 'En Uzun Seri', value: mockUser.longestStreak, emoji: '🏅' },
+    {
+      label: 'Çözülen Soru',
+      value: mockUser.totalQuestions,
+      emoji: '📝',
+    },
+    {
+      label: 'Doğru Cevap',
+      value: mockUser.correctAnswers,
+      emoji: '✅',
+    },
+    {
+      label: 'Günlük Seri',
+      value: mockUser.currentStreak,
+      emoji: '🔥',
+    },
+    {
+      label: 'En Uzun Seri',
+      value: mockUser.longestStreak,
+      emoji: '🏅',
+    },
   ];
+
+  // Get top and weak subjects
+  const subjectStats = Object.entries(userProgress.stats).map(
+    ([subjectId, stats]) => {
+      const subject = subjects.find((s) => s.id === subjectId);
+      const successRate = Math.round((stats.correct / stats.total) * 100);
+      return {
+        ...subject,
+        ...stats,
+        successRate,
+      };
+    }
+  );
+
+  const topSubjects = subjectStats
+    .sort((a, b) => b.successRate - a.successRate)
+    .slice(0, 3);
+  const weakSubjects = subjectStats
+    .sort((a, b) => a.successRate - b.successRate)
+    .slice(0, 3);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,31 +111,31 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              {mockUser.name.split(' ').map((n) => n[0]).join('')}
+              {mockUser.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')}
             </Text>
           </View>
           <Text style={styles.name}>{mockUser.name}</Text>
           <Text style={styles.email}>{mockUser.email}</Text>
         </View>
 
-        {/* Level Card */}
-        <Card style={styles.levelCard}>
-          <View style={styles.levelHeader}>
+        {/* Success Rate Card */}
+        <Card style={styles.successCard}>
+          <View style={styles.successHeader}>
             <View>
-              <Text style={styles.levelLabel}>Seviye</Text>
-              <Text style={styles.levelNumber}>{mockUser.level}</Text>
+              <Text style={styles.successLabel}>Genel Başarı Oranı</Text>
+              <Text style={styles.successRate}>%{successRate}</Text>
             </View>
-            <View style={styles.languageBadge}>
-              <Text style={styles.languageFlag}>{currentLanguage?.flag}</Text>
-              <Text style={styles.languageName}>{currentLanguage?.name}</Text>
-            </View>
-          </View>
-          <View style={styles.levelProgress}>
-            <ProgressBar progress={levelProgress} height={12} showLabel />
-            <Text style={styles.levelProgressText}>
-              {100 - levelProgress} XP sonraki seviyeye
+            <Text style={styles.successEmoji}>
+              {successRate >= 80 ? '🎉' : successRate >= 60 ? '📈' : '💪'}
             </Text>
           </View>
+          <ProgressBar progress={successRate} height={12} color="#58CC02" />
+          <Text style={styles.successText}>
+            {mockUser.correctAnswers} / {mockUser.totalQuestions} soru doğru
+          </Text>
         </Card>
 
         {/* Stats */}
@@ -76,6 +150,65 @@ export default function ProfileScreen() {
               </Card>
             ))}
           </View>
+        </View>
+
+        {/* Top Subjects */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>En İyi Konular</Text>
+          {topSubjects.map((subject) => (
+            <View key={subject.id} style={styles.subjectRow}>
+              <Text style={styles.subjectIcon}>{subject.icon}</Text>
+              <View style={styles.subjectInfo}>
+                <Text style={styles.subjectName}>{subject.name}</Text>
+                <Text style={styles.subjectStats}>
+                  {subject.correct}/{subject.total} doğru
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.successBadge,
+                  { backgroundColor: subject.color },
+                ]}
+              >
+                <Text style={styles.successBadgeText}>
+                  %{subject.successRate}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Weak Subjects */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Geliştirilmesi Gereken</Text>
+          {weakSubjects.map((subject) => (
+            <View key={subject.id} style={styles.subjectRow}>
+              <Text style={styles.subjectIcon}>{subject.icon}</Text>
+              <View style={styles.subjectInfo}>
+                <Text style={styles.subjectName}>{subject.name}</Text>
+                <Text style={styles.subjectStats}>
+                  {subject.correct}/{subject.total} doğru
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.successBadge,
+                  {
+                    backgroundColor:
+                      subject.successRate >= 70
+                        ? '#58CC02'
+                        : subject.successRate >= 50
+                        ? '#FF9600'
+                        : '#FF4B4B',
+                  },
+                ]}
+              >
+                <Text style={styles.successBadgeText}>
+                  %{subject.successRate}
+                </Text>
+              </View>
+            </View>
+          ))}
         </View>
 
         {/* Achievements */}
@@ -134,7 +267,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             <View style={styles.settingDivider} />
             <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingText}>🌍 Dil Değiştir</Text>
+              <Text style={styles.settingText}>📊 İstatistikleri Sıfırla</Text>
               <Text style={styles.settingArrow}>→</Text>
             </TouchableOpacity>
             <View style={styles.settingDivider} />
@@ -190,50 +323,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#777777',
   },
-  levelCard: {
+  successCard: {
     margin: 20,
     marginBottom: 8,
   },
-  levelHeader: {
+  successHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  levelLabel: {
+  successLabel: {
     fontSize: 14,
     color: '#777777',
     marginBottom: 4,
   },
-  levelNumber: {
+  successRate: {
     fontSize: 32,
     fontWeight: '700',
     color: '#58CC02',
   },
-  languageBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F7F7F7',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 8,
+  successEmoji: {
+    fontSize: 48,
   },
-  languageFlag: {
-    fontSize: 24,
-  },
-  languageName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F1F1F',
-  },
-  levelProgress: {
-    gap: 8,
-  },
-  levelProgressText: {
+  successText: {
     fontSize: 12,
     color: '#777777',
     textAlign: 'center',
+    marginTop: 8,
   },
   section: {
     paddingHorizontal: 20,
@@ -267,6 +384,47 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     color: '#777777',
+    textAlign: 'center',
+  },
+  subjectRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  subjectIcon: {
+    fontSize: 32,
+    marginRight: 12,
+  },
+  subjectInfo: {
+    flex: 1,
+  },
+  subjectName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F1F1F',
+    marginBottom: 2,
+  },
+  subjectStats: {
+    fontSize: 12,
+    color: '#777777',
+  },
+  successBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  successBadgeText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   achievementsGrid: {
     flexDirection: 'row',

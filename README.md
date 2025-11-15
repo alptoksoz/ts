@@ -1,17 +1,22 @@
-# 🎓 Duolingo Clone - React Native
+# 🩺 TUS Hazırlık - React Native Mobil Uygulama
 
-Modern ve kullanıcı dostu bir dil öğrenme uygulaması. Duolingo'dan ilham alınarak React Native ve TypeScript ile geliştirilmiştir.
+Modern ve kullanıcı dostu bir TUS (Tıpta Uzmanlık Sınavı) hazırlık uygulaması. Duolingo'nun etkileşimli yaklaşımından ilham alınarak React Native ve TypeScript ile geliştirilmiştir.
 
 ## ✨ Özellikler
 
-- 🏠 **Ana Ekran**: Günlük streak, XP takibi ve hızlı başlangıç seçenekleri
-- 📚 **Dersler**: Duolingo tarzı yol haritası ile görsel ders takibi
-- ✏️ **İnteraktif Egzersizler**:
-  - Çoktan seçmeli sorular
-  - Çeviri egzersizleri
-  - Kelime eşleştirme oyunları
-- 👤 **Profil**: İstatistikler, başarılar ve ilerleme takibi
-- 🎨 **Modern UI**: Temiz, renkli ve kullanıcı dostu arayüz
+- 🏠 **Ana Ekran**: Günlük seri, çözülen sorular, başarı oranı takibi
+- 📚 **Konu Yolculuğu**: Görsel yol haritası ile konu takibi
+- ✏️ **İnteraktif Sorular**:
+  - Çoktan seçmeli TUS soruları (A-E şıkları)
+  - Vaka bazlı sorular
+  - Detaylı açıklamalar
+  - Anlık geri bildirim
+- 👤 **Profil ve İstatistikler**:
+  - Genel başarı oranı
+  - Konu bazlı performans analizi
+  - Zayıf konular takibi
+  - Başarı rozetleri
+- 🎨 **Modern UI**: Temiz, renkli ve hekim adaylarına özel arayüz
 
 ## 🚀 Kurulum
 
@@ -35,31 +40,40 @@ npm run web
 ## 📱 Ekranlar
 
 ### Ana Ekran (Home)
-- Günlük seri (streak) takibi 🔥
-- Toplam XP ve seviye gösterimi ⭐
-- Günlük hedef ilerleme çubuğu 🎯
-- Hızlı pratik seçenekleri
-- Diğer dillere geçiş
+- Günlük seri takibi 🔥
+- Toplam doğru cevap ve başarı oranı ✅
+- Günlük soru hedefi ve ilerleme 🎯
+- Hızlı başlangıç seçenekleri:
+  - Günlük test (20 soru)
+  - Zayıf konular pratiği
+  - Mock sınav
+- Temel bilimler ve klinik bilimler kategorileri
 
-### Dersler (Lessons)
-- Üniteler halinde organize edilmiş dersler
-- Görsel yol haritası
-- Ders tipleri: Normal ders, Pratik, Hikaye, Test
-- Tamamlanan dersler için görsel geri bildirim
-- Kilitli/açık ders gösterimi
+### Konu Yolculuğu (Lessons)
+- Görsel yol haritası (Duolingo tarzı)
+- Konu grupları:
+  - Temel Tıp Bilimleri (Anatomi, Fizyoloji, Biyokimya, Farmakoloji, vb.)
+  - Klinik Bilimler (Dahiliye, Cerrahi, Pediatri, Kadın Hastalıkları, vb.)
+- Zorluk seviyeleri: Kolay, Orta, Zor
+- Tamamlanma durumu gösterimi
 
-### Egzersiz (Exercise)
-- Farklı egzersiz tipleri
-- İlerleme takibi
-- Anlık geri bildirim
-- Puan hesaplama
-- Tamamlama ekranı
+### Soru Çözme (Exercise)
+- TUS formatında çoktan seçmeli sorular
+- A-E şıkları ile profesyonel görünüm
+- İlerleme çubuğu
+- Doğru/yanlış geri bildirimi
+- Detaylı açıklamalar
+- Konu bazlı performans hesaplama
 
 ### Profil (Profile)
-- Kullanıcı bilgileri
-- Seviye ve XP detayları
-- İstatistikler (toplam ders, seri, vb.)
-- Başarımlar sistemi
+- Kullanıcı bilgileri ve genel başarı oranı
+- İstatistikler:
+  - Çözülen soru sayısı
+  - Doğru cevap sayısı
+  - Günlük ve en uzun seri
+- En iyi konular listesi
+- Geliştirilmesi gereken konular
+- Başarı rozetleri sistemi
 - Ayarlar menüsü
 
 ## 🏗️ Proje Yapısı
@@ -86,13 +100,30 @@ ts/
 └── package.json
 ```
 
-## 🎨 Tasarım
+## 🎓 İçerik Yapısı
 
-Uygulama, Duolingo'nun modern ve renkli tasarım dilinden ilham alır:
-- **Yeşil (#58CC02)**: Başarı, tamamlama, pozitif aksiyonlar
-- **Mavi (#1CB0F6)**: Aktif dersler, seçimler
+### Temel Tıp Bilimleri
+- 🦴 Anatomi
+- ❤️ Fizyoloji
+- 🧬 Biyokimya
+- 💊 Farmakoloji
+- 🔬 Patoloji
+- 🦠 Mikrobiyoloji
+
+### Klinik Bilimler
+- 🩺 Dahiliye
+- 🏥 Cerrahi
+- 👶 Pediatri
+- 🤰 Kadın Hastalıkları ve Doğum
+
+## 🎨 Tasarım Dili
+
+Uygulama, tıp dünyasına uygun modern ve profesyonel bir tasarım kullanır:
+- **Yeşil (#58CC02)**: Başarı, doğru cevaplar
+- **Mavi (#1CB0F6)**: Seçili durumlar, aktif konular
 - **Sarı (#FFD900)**: Başarımlar, özel işaretler
-- **Kırmızı (#FF4B4B)**: Hatalar, uyarılar
+- **Kırmızı (#FF4B4B)**: Yanlış cevaplar, zayıf konular
+- **Konu Renkleri**: Her tıp dalı için özel renk paleti
 
 ## 🔧 Teknolojiler
 
@@ -103,22 +134,46 @@ Uygulama, Duolingo'nun modern ve renkli tasarım dilinden ilham alır:
 
 ## 📝 Mock Data
 
-Uygulama şu anda mock data ile çalışmaktadır:
-- 4 farklı dil seçeneği (İngilizce, İspanyolca, Fransızca, Almanca)
-- 3 ünite
-- Her ünitede 2-3 ders
-- Farklı egzersiz tipleri
+Uygulama şu anda detaylı mock data ile çalışmaktadır:
+- 10 farklı tıp dalı (temel bilimler + klinik bilimler)
+- 3+ konu grubu
+- 12+ gerçek TUS sorusu örneği
+- Detaylı açıklamalar ve konu etiketleri
+
+### Örnek Sorular
+- Anatomi: Kardiyovasküler sistem, üst ekstremite
+- Fizyoloji: Nörofizyoloji, renal fizyoloji, kardiyovasküler fizyoloji
+- Biyokimya: Metabolizma, glikoliz, Krebs döngüsü
+- Farmakoloji: Beta-blokerler, ACE inhibitörleri
+- Dahiliye: Kardiyoloji, endokrinoloji, EKG yorumlama
+- Cerrahi: Akut batın, apandisit
 
 ## 🎯 Gelecek Geliştirmeler
 
-- [ ] Ses kaydı ve dinleme egzersizleri
 - [ ] Backend entegrasyonu
 - [ ] Gerçek kullanıcı kayıt/giriş sistemi
+- [ ] Daha fazla TUS sorusu ve konu
+- [ ] Soru favorileme ve not alma
+- [ ] Zamanlayıcılı deneme sınavları
+- [ ] Konu anlatım videoları
 - [ ] Sosyal özellikler (liderlik tablosu, arkadaş ekleme)
-- [ ] Daha fazla egzersiz tipi
+- [ ] Performans analizi ve zayıf konu önerileri
 - [ ] Bildirim sistemi
 - [ ] Offline mod
+- [ ] Soru paylaşma ve yorum yapma
+- [ ] Grafik ve raporlama
+
+## 👥 Hedef Kitle
+
+- TUS'a hazırlanan tıp fakültesi mezunları
+- Tıpta uzmanlık sınavına girecek hekim adayları
+- Tıbbi bilgilerini güncel tutmak isteyen hekimler
+- Tıp fakültesi öğrencileri
 
 ## 📄 Lisans
 
 Bu proje eğitim amaçlıdır.
+
+## 🙏 Teşekkürler
+
+Duolingo'nun etkileşimli öğrenme yaklaşımından ilham alınmıştır.

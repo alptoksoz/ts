@@ -5,14 +5,14 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
-  TextInput,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { Button, ProgressBar } from '../components';
-import { units } from '../data/mockData';
-import { Exercise } from '../types';
+import { Button, ProgressBar, Card } from '../components';
+import { subjectGroups } from '../data/mockData';
+import { Question } from '../types';
 
 type ExerciseRouteProp = RouteProp<RootStackParamList, 'Exercise'>;
 
@@ -21,46 +21,30 @@ export default function ExerciseScreen() {
   const navigation = useNavigation();
   const { lessonId } = route.params;
 
-  // Find lesson
-  const lesson = units
-    .flatMap((unit) => unit.lessons)
-    .find((l) => l.id === lessonId);
+  // Find topic
+  const topic = subjectGroups
+    .flatMap((group) => group.topics)
+    .find((t) => t.id === lessonId);
 
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
-  const [matchedPairs, setMatchedPairs] = useState<{ [key: string]: string }>({});
-  const [selectedWord, setSelectedWord] = useState<string>('');
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
 
-  if (!lesson) {
+  if (!topic) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Ders bulunamadı</Text>
+        <Text>Konu bulunamadı</Text>
       </SafeAreaView>
     );
   }
 
-  const currentExercise = lesson.exercises[currentExerciseIndex];
-  const progress = ((currentExerciseIndex + 1) / lesson.exercises.length) * 100;
+  const currentQuestion = topic.questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / topic.questions.length) * 100;
 
   const handleCheck = () => {
-    let correct = false;
-
-    if (currentExercise.type === 'select') {
-      correct = selectedAnswer === currentExercise.answer;
-    } else if (currentExercise.type === 'translate') {
-      const userAnswer = selectedAnswer.toLowerCase().trim();
-      const correctAnswer = currentExercise.answer.toLowerCase().trim();
-      correct = userAnswer === correctAnswer;
-    } else if (currentExercise.type === 'match') {
-      const pairs = currentExercise.pairs || [];
-      correct = pairs.every(
-        (pair) => matchedPairs[pair.word] === pair.translation
-      );
-    }
-
+    const correct = selectedAnswer === currentQuestion.correctAnswer;
     setIsCorrect(correct);
     setShowResult(true);
 
@@ -70,19 +54,17 @@ export default function ExerciseScreen() {
   };
 
   const handleNext = () => {
-    if (currentExerciseIndex < lesson.exercises.length - 1) {
-      setCurrentExerciseIndex(currentExerciseIndex + 1);
+    if (currentQuestionIndex < topic.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer('');
-      setMatchedPairs({});
-      setSelectedWord('');
       setShowResult(false);
       setIsCorrect(false);
     } else {
-      // Lesson completed
-      const earnedXP = Math.round((score / lesson.exercises.length) * lesson.xp);
+      // Topic completed
+      const successRate = Math.round((score / topic.questions.length) * 100);
       Alert.alert(
-        'Tebrikler! 🎉',
-        `Dersi tamamladın!\n\nDoğru: ${score}/${lesson.exercises.length}\n+${earnedXP} XP kazandın!`,
+        'Konu Tamamlandı! 🎉',
+        `${topic.title}\n\nDoğru: ${score}/${topic.questions.length}\nBaşarı Oranı: %${successRate}`,
         [
           {
             text: 'Harika!',
@@ -93,149 +75,85 @@ export default function ExerciseScreen() {
     }
   };
 
-  const handleMatchSelect = (item: string, type: 'word' | 'translation') => {
-    if (type === 'word') {
-      setSelectedWord(item);
-    } else if (selectedWord) {
-      setMatchedPairs({ ...matchedPairs, [selectedWord]: item });
-      setSelectedWord('');
-    }
-  };
-
-  const renderExercise = () => {
-    switch (currentExercise.type) {
-      case 'select':
-        return (
-          <View style={styles.exerciseContainer}>
-            <Text style={styles.question}>{currentExercise.question}</Text>
-            <View style={styles.optionsContainer}>
-              {currentExercise.options?.map((option) => (
-                <TouchableOpacity
-                  key={option}
-                  style={[
-                    styles.optionButton,
-                    selectedAnswer === option && styles.optionSelected,
-                    showResult &&
-                      option === currentExercise.answer &&
-                      styles.optionCorrect,
-                    showResult &&
-                      selectedAnswer === option &&
-                      !isCorrect &&
-                      styles.optionWrong,
-                  ]}
-                  onPress={() => !showResult && setSelectedAnswer(option)}
-                  disabled={showResult}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      selectedAnswer === option && styles.optionTextSelected,
-                    ]}
-                  >
-                    {option}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        );
-
-      case 'translate':
-        return (
-          <View style={styles.exerciseContainer}>
-            <Text style={styles.question}>{currentExercise.question}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Çevirini yaz..."
-              value={selectedAnswer}
-              onChangeText={setSelectedAnswer}
-              editable={!showResult}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            {showResult && (
-              <View style={styles.answerFeedback}>
-                <Text style={styles.correctAnswer}>
-                  Doğru cevap: {currentExercise.answer}
-                </Text>
-              </View>
-            )}
-          </View>
-        );
-
-      case 'match':
-        const pairs = currentExercise.pairs || [];
-        const words = pairs.map((p) => p.word);
-        const translations = pairs
-          .map((p) => p.translation)
-          .sort(() => Math.random() - 0.5);
-
-        return (
-          <View style={styles.exerciseContainer}>
-            <Text style={styles.question}>{currentExercise.question}</Text>
-            <View style={styles.matchContainer}>
-              <View style={styles.matchColumn}>
-                {words.map((word) => (
-                  <TouchableOpacity
-                    key={word}
-                    style={[
-                      styles.matchItem,
-                      selectedWord === word && styles.matchItemSelected,
-                      matchedPairs[word] && styles.matchItemMatched,
-                    ]}
-                    onPress={() => !showResult && handleMatchSelect(word, 'word')}
-                    disabled={showResult || !!matchedPairs[word]}
-                  >
-                    <Text style={styles.matchText}>{word}</Text>
-                    {matchedPairs[word] && (
-                      <Text style={styles.matchedWith}>→ {matchedPairs[word]}</Text>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.matchColumn}>
-                {translations.map((translation) => {
-                  const isMatched = Object.values(matchedPairs).includes(translation);
-                  return (
-                    <TouchableOpacity
-                      key={translation}
-                      style={[
-                        styles.matchItem,
-                        isMatched && styles.matchItemMatched,
-                      ]}
-                      onPress={() =>
-                        !showResult && handleMatchSelect(translation, 'translation')
-                      }
-                      disabled={showResult || isMatched}
-                    >
-                      <Text style={styles.matchText}>{translation}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-          </View>
-        );
-
-      default:
-        return <Text>Bilinmeyen egzersiz tipi</Text>;
-    }
-  };
-
-  const canCheck = () => {
-    if (currentExercise.type === 'match') {
-      return Object.keys(matchedPairs).length === (currentExercise.pairs?.length || 0);
-    }
-    return selectedAnswer.length > 0;
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.progressContainer}>
         <ProgressBar progress={progress} height={8} />
+        <Text style={styles.questionCounter}>
+          Soru {currentQuestionIndex + 1}/{topic.questions.length}
+        </Text>
       </View>
 
-      <View style={styles.content}>{renderExercise()}</View>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.questionContainer}>
+          <Text style={styles.question}>{currentQuestion.question}</Text>
+
+          <View style={styles.optionsContainer}>
+            {currentQuestion.options.map((option, index) => {
+              const optionLetter = String.fromCharCode(65 + index); // A, B, C, D, E
+              const isSelected = selectedAnswer === option;
+              const isCorrectAnswer = option === currentQuestion.correctAnswer;
+
+              let optionStyle = [styles.optionButton];
+              if (isSelected && !showResult) {
+                optionStyle.push(styles.optionSelected);
+              }
+              if (showResult && isCorrectAnswer) {
+                optionStyle.push(styles.optionCorrect);
+              }
+              if (showResult && isSelected && !isCorrect) {
+                optionStyle.push(styles.optionWrong);
+              }
+
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={optionStyle}
+                  onPress={() => !showResult && setSelectedAnswer(option)}
+                  disabled={showResult}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.optionContent}>
+                    <View
+                      style={[
+                        styles.optionLetter,
+                        isSelected && !showResult && styles.optionLetterSelected,
+                        showResult && isCorrectAnswer && styles.optionLetterCorrect,
+                        showResult && isSelected && !isCorrect && styles.optionLetterWrong,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.optionLetterText,
+                          (isSelected || (showResult && isCorrectAnswer)) &&
+                            styles.optionLetterTextSelected,
+                        ]}
+                      >
+                        {optionLetter}
+                      </Text>
+                    </View>
+                    <Text style={styles.optionText}>{option}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {showResult && currentQuestion.explanation && (
+            <Card style={styles.explanationCard}>
+              <View style={styles.explanationHeader}>
+                <Text style={styles.explanationIcon}>
+                  {isCorrect ? '✅' : 'ℹ️'}
+                </Text>
+                <Text style={styles.explanationTitle}>Açıklama</Text>
+              </View>
+              <Text style={styles.explanationText}>
+                {currentQuestion.explanation}
+              </Text>
+            </Card>
+          )}
+        </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         {showResult ? (
@@ -247,14 +165,19 @@ export default function ExerciseScreen() {
               ]}
             >
               <Text style={styles.resultText}>
-                {isCorrect ? '✓ Doğru!' : '✗ Yanlış'}
+                {isCorrect ? '✓ Doğru Cevap!' : '✗ Yanlış Cevap'}
               </Text>
+              {!isCorrect && (
+                <Text style={styles.correctAnswerText}>
+                  Doğru cevap: {currentQuestion.correctAnswer}
+                </Text>
+              )}
             </View>
             <Button
               title={
-                currentExerciseIndex < lesson.exercises.length - 1
-                  ? 'Devam Et'
-                  : 'Bitir'
+                currentQuestionIndex < topic.questions.length - 1
+                  ? 'Sonraki Soru'
+                  : 'Konuyu Bitir'
               }
               onPress={handleNext}
               variant="success"
@@ -266,7 +189,7 @@ export default function ExerciseScreen() {
           <Button
             title="Kontrol Et"
             onPress={handleCheck}
-            disabled={!canCheck()}
+            disabled={!selectedAnswer}
             variant="primary"
             size="large"
             style={styles.button}
@@ -285,21 +208,29 @@ const styles = StyleSheet.create({
   progressContainer: {
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 20,
+    paddingBottom: 16,
+  },
+  questionCounter: {
+    fontSize: 14,
+    color: '#777777',
+    textAlign: 'center',
+    marginTop: 8,
+    fontWeight: '600',
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
   },
-  exerciseContainer: {
+  questionContainer: {
     flex: 1,
+    paddingBottom: 20,
   },
   question: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '600',
     color: '#1F1F1F',
-    marginBottom: 32,
-    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 28,
   },
   optionsContainer: {
     gap: 12,
@@ -309,8 +240,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#E5E5E5',
     borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
+    padding: 16,
   },
   optionSelected: {
     borderColor: '#1CB0F6',
@@ -324,73 +254,75 @@ const styles = StyleSheet.create({
     borderColor: '#FF4B4B',
     backgroundColor: '#FFE8E8',
   },
-  optionText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F1F1F',
-  },
-  optionTextSelected: {
-    color: '#1CB0F6',
-  },
-  input: {
-    backgroundColor: '#F7F7F7',
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
-    borderRadius: 12,
-    padding: 20,
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  answerFeedback: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: '#E8F7E4',
-    borderRadius: 12,
-  },
-  correctAnswer: {
-    fontSize: 16,
-    color: '#58CC02',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  matchContainer: {
+  optionContent: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
-  matchColumn: {
-    flex: 1,
-    gap: 12,
-  },
-  matchItem: {
+  optionLetter: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: '#F7F7F7',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#E5E5E5',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
   },
-  matchItemSelected: {
+  optionLetterSelected: {
+    backgroundColor: '#1CB0F6',
     borderColor: '#1CB0F6',
-    backgroundColor: '#E7F5FE',
   },
-  matchItemMatched: {
+  optionLetterCorrect: {
+    backgroundColor: '#58CC02',
     borderColor: '#58CC02',
-    backgroundColor: '#E8F7E4',
   },
-  matchText: {
+  optionLetterWrong: {
+    backgroundColor: '#FF4B4B',
+    borderColor: '#FF4B4B',
+  },
+  optionLetterText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#777777',
+  },
+  optionLetterTextSelected: {
+    color: '#FFFFFF',
+  },
+  optionText: {
+    flex: 1,
     fontSize: 16,
-    fontWeight: '600',
+    color: '#1F1F1F',
+    lineHeight: 22,
+  },
+  explanationCard: {
+    marginTop: 20,
+    backgroundColor: '#F9FAFB',
+  },
+  explanationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  explanationIcon: {
+    fontSize: 20,
+  },
+  explanationTitle: {
+    fontSize: 16,
+    fontWeight: '700',
     color: '#1F1F1F',
   },
-  matchedWith: {
-    fontSize: 12,
-    color: '#58CC02',
-    marginTop: 4,
+  explanationText: {
+    fontSize: 14,
+    color: '#555555',
+    lineHeight: 20,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#E5E5E5',
+    backgroundColor: '#FFFFFF',
   },
   button: {
     width: '100%',
@@ -413,5 +345,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#1F1F1F',
+  },
+  correctAnswerText: {
+    fontSize: 14,
+    color: '#777777',
+    marginTop: 4,
   },
 });
