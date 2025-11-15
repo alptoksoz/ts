@@ -10,14 +10,18 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ExerciseScreen from '../screens/ExerciseScreen';
 
 export type RootStackParamList = {
-  Home: undefined;
-  Lessons: undefined;
-  Profile: undefined;
+  MainTabs: undefined;
   Exercise: { lessonId: string };
 };
 
-const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+export type TabParamList = {
+  Home: undefined;
+  Lessons: undefined;
+  Profile: undefined;
+};
+
+const Tab = createBottomTabNavigator<TabParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function HomeTabs() {
   return (

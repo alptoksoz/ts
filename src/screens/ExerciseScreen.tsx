@@ -94,21 +94,15 @@ export default function ExerciseScreen() {
               const isSelected = selectedAnswer === option;
               const isCorrectAnswer = option === currentQuestion.correctAnswer;
 
-              let optionStyle = [styles.optionButton];
-              if (isSelected && !showResult) {
-                optionStyle.push(styles.optionSelected);
-              }
-              if (showResult && isCorrectAnswer) {
-                optionStyle.push(styles.optionCorrect);
-              }
-              if (showResult && isSelected && !isCorrect) {
-                optionStyle.push(styles.optionWrong);
-              }
-
               return (
                 <TouchableOpacity
                   key={index}
-                  style={optionStyle}
+                  style={[
+                    styles.optionButton,
+                    isSelected && !showResult && styles.optionSelected,
+                    showResult && isCorrectAnswer && styles.optionCorrect,
+                    showResult && isSelected && !isCorrect && styles.optionWrong,
+                  ]}
                   onPress={() => !showResult && setSelectedAnswer(option)}
                   disabled={showResult}
                   activeOpacity={0.7}
