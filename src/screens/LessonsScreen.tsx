@@ -228,7 +228,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
-    gap: 12,
   },
   groupBadge: {
     width: 56,
@@ -236,6 +235,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 12,
   },
   groupBadgeText: {
     fontSize: 28,

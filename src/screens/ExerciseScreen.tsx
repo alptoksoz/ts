@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   optionsContainer: {
-    gap: 12,
   },
   optionButton: {
     backgroundColor: '#FFFFFF',
@@ -235,6 +234,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E5E5',
     borderRadius: 12,
     padding: 16,
+    marginBottom: 12,
   },
   optionSelected: {
     borderColor: '#1CB0F6',
@@ -251,7 +251,6 @@ const styles = StyleSheet.create({
   optionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
   },
   optionLetter: {
     width: 32,
@@ -262,6 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#E5E5E5',
+    marginRight: 12,
   },
   optionLetterSelected: {
     backgroundColor: '#1CB0F6',
@@ -296,11 +296,11 @@ const styles = StyleSheet.create({
   explanationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
     marginBottom: 8,
   },
   explanationIcon: {
     fontSize: 20,
+    marginRight: 8,
   },
   explanationTitle: {
     fontSize: 16,
@@ -322,12 +322,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   resultContainer: {
-    gap: 12,
   },
   resultBanner: {
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginBottom: 12,
   },
   correctBanner: {
     backgroundColor: '#E8F7E4',

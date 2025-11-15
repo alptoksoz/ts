@@ -365,11 +365,12 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   statCard: {
     width: '48%',
     alignItems: 'center',
+    marginBottom: 12,
   },
   statEmoji: {
     fontSize: 32,
@@ -429,7 +430,7 @@ const styles = StyleSheet.create({
   achievementsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   achievementCard: {
     backgroundColor: '#FFFFFF',
@@ -437,6 +438,7 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     width: '48%',
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
