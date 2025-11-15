@@ -24,12 +24,25 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   style,
 }) => {
+  const variantStyle = variant === 'primary' ? styles.primary
+    : variant === 'secondary' ? styles.secondary
+    : variant === 'success' ? styles.success
+    : styles.danger;
+
+  const sizeStyle = size === 'small' ? styles.smallSize
+    : size === 'large' ? styles.largeSize
+    : styles.mediumSize;
+
+  const textSizeStyle = size === 'small' ? styles.smallText
+    : size === 'large' ? styles.largeText
+    : styles.mediumText;
+
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        styles[variant],
-        styles[`${size}Size`],
+        variantStyle,
+        sizeStyle,
         disabled && styles.disabled,
         style,
       ]}
@@ -37,7 +50,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       activeOpacity={0.8}
     >
-      <Text style={[styles.text, styles[`${size}Text`]]}>{title}</Text>
+      <Text style={[styles.text, textSizeStyle]}>{title}</Text>
     </TouchableOpacity>
   );
 };
