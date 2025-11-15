@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   statCard: {
-    width: 'calc(50% - 6px)',
+    width: '48%',
     alignItems: 'center',
   },
   statEmoji: {
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
-    width: 'calc(50% - 6px)',
+    width: '48%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
