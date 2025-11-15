@@ -9,7 +9,7 @@ interface CardProps {
 
 export const Card: React.FC<CardProps> = ({ children, style, padding = 16 }) => {
   return (
-    <View style={[styles.card, { padding }, style]}>
+    <View style={[styles.card, { padding: padding }, style]}>
       {children}
     </View>
   );

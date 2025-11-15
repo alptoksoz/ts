@@ -20,13 +20,13 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.track, { height, backgroundColor }]}>
+      <View style={[styles.track, { height: height, backgroundColor: backgroundColor }]}>
         <View
           style={[
             styles.fill,
             {
               width: `${clampedProgress}%`,
-              height,
+              height: height,
               backgroundColor: color,
             },
           ]}
